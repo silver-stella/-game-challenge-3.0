@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>放放老师班·萌宠跑酷斩词王</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body {
+            background: #8fc0a9;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Comic Neue', system-ui, -apple-system, sans-serif;
+            padding: 12px;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 450px; /* 9:16 手机常见宽度 */
+            background: #c0dfb0;
+            border-radius: 48px;
+            padding: 16px 14px 24px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+            text-align: center;
+            margin: 0 auto;
+        }
+        .panel {
+            transition: all 0.2s ease;
+        }
+        .hidden-panel {
+            display: none;
+        }
+        .btn {
+            background: #e5a34d;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: #2c1a0c;
+            margin: 8px auto;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #7e4a1f;
+            transition: 0.05s linear;
+            display: inline-block;
+        }
+        .btn:active { transform: translateY(2px); }
+        .btn-secondary {
+            background: #9b6a3c;
+        }
+        .friends-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #3b2a1f;
+            background: #ffefbf;
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 40px;
+            margin-bottom: 10px;
+        }
+        .friends-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px 4px;
+            padding: 6px;
+            margin-bottom: 12px;
+            background: #e9d9b9aa;
+            border-radius: 48px;
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+        .friend-card {
+            background: #fff2dfaa;
+            border-radius: 16px;
+            padding: 4px 2px;
+            text-align: center;
+            border: 1px solid #e4b363;
+            position: relative;
+        }
+        .friend-card.highlight {
+            background: #ffe6b3;
+            border: 2px solid #f7b32b;
+        }
+        .friend-name {
+            font-size: 0.6rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow-x: auto;
+        }
+        .friend-name.gray {
+            color: #9e8b72;
+        }
+        .dog-icon-canvas {
+            width: 45px;
+            height: 45px;
+            margin: 0 auto 2px;
+            display: block;
+        }
+        .personal-dog-card {
+            background: #fff2dfdd;
+            border-radius: 56px;
+            padding: 20px 16px;
+            margin: 16px 0;
+            text-align: center;
+            position: relative;
+        }
+        .dog-display {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 12px;
+            position: relative;
+        }
+        .love-floating {
+            position: absolute;
+            pointer-events: none;
+            font-size: 1rem;
+            animation: floatUp 1.5s ease-out forwards;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-30px) scale(1.2); }
+        }
+        .canvas-container {
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            margin-bottom: 12px;
+            background: #d9f0c5;
+            position: relative;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #e4f7d4;
+        }
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            background: #fff2dfdd;
+            backdrop-filter: blur(5px);
+            padding: 5px 12px;
+            border-radius: 50px;
+            margin-bottom: 12px;
+            gap: 6px;
+            flex-wrap: wrap;
+            border: 2px solid #ffcd94;
+        }
+        .timer-box, .score-box, .mic-status {
+            background: #f5b642;
+            padding: 3px 10px;
+            border-radius: 30px;
+            font-weight: bold;
+            color: #3b2a1f;
+            font-size: 0.75rem;
+        }
+        .score-box { background: #85b87a; color: #fff3cf; }
+        .mic-status { background: #ffffbb; }
+        .word-card {
+            background: #fbe9c3;
+            border-radius: 48px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border: 3px solid #e4b363;
+            box-shadow: 0 4px 0 #9b6a3c;
+        }
+        .word-display {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #744f2e;
+            background: #fff2d7;
+            padding: 6px 12px;
+            border-radius: 50px;
+            text-align: center;
+            flex: 1;
+            min-width: 0;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+        }
+        .btn-icon {
+            border: none;
+            font-size: 1.2rem;
+            padding: 6px 14px;
+            border-radius: 50px;
+            background: #ffecb3;
+            box-shadow: 0 3px 0 #b97f42;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: bold;
+        }
+        .btn-icon:active { transform: translateY(2px); }
+        .mic-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 6px 0;
+        }
+        .mic-btn {
+            background: #ffb347;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c4720e6;
+            backdrop-filter: blur(8px);
+            color: #ffecb3;
+            padding: 5px 14px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            z-index: 2000;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .bottom-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .nickname-bar {
+            background: #ffefbfcc;
+            border-radius: 40px;
+            padding: 3px 10px;
+            margin-bottom: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+        }
+        .change-nickname {
+            background: none;
+            border: none;
+            color: #e5a34d;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        @media (max-width: 480px) {
+            .friends-grid {
+                gap: 4px;
+            }
+            .dog-icon-canvas {
+                width: 38px;
+                height: 38px;
+            }
+            .friend-name {
+                font-size: 0.5rem;
+            }
+            .word-display {
+                font-size: 1.2rem;
+                padding: 4px 8px;
+            }
+            .btn-icon {
+                font-size: 1rem;
+                padding: 4px 12px;
+            }
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+            .info-panel {
+                padding: 4px 10px;
+            }
+            .timer-box, .score-box, .mic-status {
+                font-size: 0.65rem;
+            }
+        }
+        .obstacle-icon {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            background: #FF6B6B;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            margin-right: 3px;
+            vertical-align: middle;
+        }
+        .quick-speak-btn {
+            position: absolute;
+            background: #ffaa55;
+            color: #2c1a0c;
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.1s;
+        }
+        .quick-speak-btn.mic-mode {
+            background: #ffaa55;
+            font-size: 1.2rem;
+            padding: 3px 10px;
+        }
+        .quick-speak-btn.mic-mode::before {
+            content: "🎤";
+            font-size: 1.2rem;
+        }
+        .quick-speak-btn.mic-mode span {
+            display: none;
+        }
+        @keyframes glow {
+            0% { box-shadow: 0 0 0 0 rgba(255, 170, 85, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(255, 170, 85, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 170, 85, 0); }
+        }
+        .quick-speak-btn.mic-mode {
+            animation: glow 1s infinite;
+        }
+        .quick-speak-btn.check-mode {
+            background: #4caf50;
+            color: white;
+            font-size: 1.2rem;
+            padding: 3px 10px;
+            animation: none;
+        }
+        .quick-speak-btn.check-mode::before {
+            content: "✓";
+            font-size: 1.2rem;
+        }
+        .quick-speak-btn.check-mode span {
+            display: none;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; background: #ffecb3; }
+            50% { opacity: 0.5; background: #ffaa77; }
+        }
+        .btn-icon.blink {
+            animation: blink 0.3s ease-in-out 2;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="nickname-bar" id="nicknameBar">
+        <span>🐕 我是</span>
+        <span id="currentNickname">我的宠物</span>
+        <button class="change-nickname" id="changeNicknameBtn">✏️ 换一个</button>
+    </div>
+
+    <div id="mainMenuPanel" class="panel">
+        <div style="font-size: 1.8rem; margin-bottom: 16px;">🐕 萌宠跑酷</div>
+        <button id="myDogBtn" class="btn">🐶 我的小狗</button>
+        <button id="classPetsBtn" class="btn btn-secondary">📋 班级萌宠</button>
+        <div class="instruction" style="font-size:0.65rem;">⭐ 查看你的小狗状态，或查看全班小伙伴的宠物！</div>
+    </div>
+
+    <div id="dogStatusPanel" class="panel hidden-panel">
+        <div class="dog-status-card">
+            <div style="font-size: 1.4rem; font-weight: bold;">🐕 我的小狗</div>
+            <div id="myDogCanvas" class="yarn-ball"></div>
+            <div class="status-text" style="margin-top: 8px; font-size:0.8rem;">未挑战 · 等待闯关</div>
+        </div>
+        <button id="startChallengeBtn" class="btn">🎮 开始闯关</button>
+        <button id="backToMainFromDog" class="btn btn-secondary">🔙 返回</button>
+    </div>
+
+    <div id="classListPanel" class="panel hidden-panel">
+        <div class="friends-title">🐕 放放老师班的萌宠们 🐕</div>
+        <div id="friendsGrid" class="friends-grid"></div>
+        <div id="classListButtons" class="bottom-buttons">
+            <button id="startChallengeFromClass" class="btn">🎮 开始挑战</button>
+            <button id="backToMainFromClass" class="btn btn-secondary">🔙 返回</button>
+        </div>
+    </div>
+
+    <div id="gamePanel" class="panel hidden-panel">
+        <div class="info-panel">
+            <div class="timer-box">⏱️ 剩余 <span id="timerSeconds">30</span> 秒</div>
+            <div class="score-box"><span class="obstacle-icon"></span> 斩词: <span id="eliminatedCount">0</span></div>
+            <div class="mic-status" id="micStatusLabel">🎤 请求中...</div>
+        </div>
+        <div class="canvas-container" style="position: relative;">
+            <canvas id="gameCanvas" width="500" height="250"></canvas>
+            <div id="quickSpeakBtn" class="quick-speak-btn" style="display: none;"><span>点击朗读</span></div>
+        </div>
+        <div class="word-card">
+            <div class="word-display" id="currentWordLabel">apple</div>
+            <div class="action-buttons">
+                <button class="btn-icon" id="speakWordBtn">🔊 听示范</button>
+            </div>
+        </div>
+        <div class="mic-buttons">
+            <button class="mic-btn" id="forceMicBtn">🎙️ 手动授权麦克风</button>
+            <button class="mic-btn test" id="testMicBtn">🔍 测试麦克风</button>
+        </div>
+        <div class="instruction" style="font-size:0.6rem;">⭐ 倒计时内，点击障碍物右侧【点击朗读】朗读，正确即可斩词！倒计时结束自动结束挑战。</div>
+    </div>
+
+    <div id="personalPanel" class="panel hidden-panel">
+        <div class="personal-dog-card">
+            <div style="font-size: 1.2rem; font-weight: bold;">🐕 我的宠物</div>
+            <div id="personalDogCanvas" class="dog-display"></div>
+            <div id="personalBubble" style="min-height: 30px;"></div>
+            <div id="feedButtonContainer">
+                <button id="feedBtn" class="btn">🍖 一键投喂</button>
+            </div>
+            <div id="afterFeedButtons" class="bottom-buttons" style="display: none;"></div>
+        </div>
+        <div class="bottom-buttons" id="personalBottomButtons" style="display: none;"></div>
+        <div id="zeroScoreRetry" class="bottom-buttons" style="display: none;">
+            <button id="retryGameBtn" class="btn">🔄 再次挑战</button>
+            <button id="nextTimeZeroBtn" class="btn btn-secondary">👋 下次再见</button>
+        </div>
+    </div>
+
+    <div id="toastMsg" class="toast" style="opacity:0;">✨</div>
+</div>
+
+<script>
+    // ------------------- 用户身份管理 -------------------
+    let currentUserName = "我的宠物";
+    
+    function getStoredUserName() {
+        const stored = localStorage.getItem("run_pet_user_name");
+        if (stored) {
+            currentUserName = stored;
+        } else {
+            let inputName = prompt("✨ 欢迎来到萌宠跑酷！\n请输入你的名字（将作为你的宠物主人显示）", "我的宠物");
+            if (inputName && inputName.trim() !== "") {
+                currentUserName = inputName.trim();
+            } else {
+                currentUserName = "我的宠物";
+            }
+            localStorage.setItem("run_pet_user_name", currentUserName);
+        }
+        document.getElementById("currentNickname").innerText = currentUserName;
+    }
+    
+    function changeNickname() {
+        let newName = prompt("✏️ 修改你的昵称", currentUserName);
+        if (newName && newName.trim() !== "") {
+            currentUserName = newName.trim();
+            localStorage.setItem("run_pet_user_name", currentUserName);
+            document.getElementById("currentNickname").innerText = currentUserName;
+            initMembers();
+            renderFriendList();
+            updateMyDogStatus();
+            if (hasTransformed) {
+                updatePersonalDog(true);
+            } else {
+                updatePersonalDog(false);
+            }
+            showToast("昵称已更新！");
+        }
+    }
+    
+    // ------------------- 模拟30个微信群成员（动态第一位为当前用户） -------------------
+    const TOTAL_MEMBERS = 30;
+    let members = [];
+    let MY_INDEX = 0;   // 当前用户在列表中的索引固定为0
+    let challengedStatus = new Array(TOTAL_MEMBERS).fill(false);
+    let hasTransformed = false;
+    
+    const englishNames = [
+        "Luna", "Max", "Bella", "Charlie", "Lucy", "Cooper", "Daisy", "Milo", "Lola", "Oliver",
+        "Sophie", "Jack", "Zoe", "Leo", "Molly", "Rocky", "Coco", "Teddy", "Ruby", "Oscar",
+        "Lily", "Bailey", "Stella", "Winston", "Penny", "Gus", "Rosie", "Henry", "Mia", "Buddy"
+    ];
+    
+    function initMembers() {
+        members = [];
+        members.push({ name: currentUserName, isSelf: true, challenged: false });
+        for (let i = 0; i < TOTAL_MEMBERS - 1; i++) {
+            members.push({ name: englishNames[i % englishNames.length], isSelf: false, challenged: false });
+        }
+        if (hasTransformed) {
+            members[0].challenged = true;
+            challengedStatus[0] = true;
+        } else {
+            members[0].challenged = false;
+            challengedStatus[0] = false;
+        }
+        for (let i = 1; i < TOTAL_MEMBERS; i++) {
+            members[i].challenged = challengedStatus[i];
+        }
+    }
+    
+    // 游戏全局变量
+    let gameCompletedFlag = false;
+    let gameCanvas, gameCtx, gameAnimationId = null;
+    let eliminatedWords = 0;
+    let timerSeconds = 30;
+    let timerInterval = null;
+    let currentWord = "apple";
+    let isWaitingForResult = false, activeRecognition = null, micGranted = false;
+    let obstacleX = 520, RUNNER_X = 130, obstacleActive = true;
+    let frameCounter = 0, bgOffset = 0, obstacleRotation = 0;
+    let isTransforming = false, transformStartTime = 0, exitObstacleX = null;
+    let legCycle = 0, tailAngle = 0;
+    const OBSTACLE_SPEED = 3.8;
+    const EXIT_SPEED = 4;
+    let quickSpeakBtn = null;
+    let quickSpeakVisible = false;
+    let isQuickSpeakActivated = false;
+    
+    let isFeedingTransform = false;
+    let transformProgress = 0;
+    let transformStart = 0;
+    let loveInterval = null;
+    
+    // DOM 元素
+    const mainMenuPanel = document.getElementById('mainMenuPanel');
+    const dogStatusPanel = document.getElementById('dogStatusPanel');
+    const classListPanel = document.getElementById('classListPanel');
+    const gamePanel = document.getElementById('gamePanel');
+    const personalPanel = document.getElementById('personalPanel');
+    const friendsGrid = document.getElementById('friendsGrid');
+    const myDogCanvas = document.getElementById('myDogCanvas');
+    const startChallengeBtn = document.getElementById('startChallengeBtn');
+    const backToMainFromDog = document.getElementById('backToMainFromDog');
+    const backToMainFromClass = document.getElementById('backToMainFromClass');
+    const startChallengeFromClass = document.getElementById('startChallengeFromClass');
+    const myDogBtn = document.getElementById('myDogBtn');
+    const classPetsBtn = document.getElementById('classPetsBtn');
+    const speakWordBtn = document.getElementById('speakWordBtn');
+    const forceMicBtn = document.getElementById('forceMicBtn');
+    const testMicBtn = document.getElementById('testMicBtn');
+    const micStatusLabel = document.getElementById('micStatusLabel');
+    const timerSecondsSpan = document.getElementById('timerSeconds');
+    const eliminatedCountSpan = document.getElementById('eliminatedCount');
+    const currentWordLabel = document.getElementById('currentWordLabel');
+    const toastMsgDiv = document.getElementById('toastMsg');
+    const feedBtn = document.getElementById('feedBtn');
+    const personalDogCanvas = document.getElementById('personalDogCanvas');
+    const personalBubble = document.getElementById('personalBubble');
+    const feedButtonContainer = document.getElementById('feedButtonContainer');
+    const afterFeedButtons = document.getElementById('afterFeedButtons');
+    const personalBottomButtons = document.getElementById('personalBottomButtons');
+    const zeroScoreRetry = document.getElementById('zeroScoreRetry');
+    const retryGameBtn = document.getElementById('retryGameBtn');
+    const nextTimeZeroBtn = document.getElementById('nextTimeZeroBtn');
+    const classListButtons = document.getElementById('classListButtons');
+    const changeNicknameBtn = document.getElementById('changeNicknameBtn');
+    
+    function showToast(msg, isError = false) {
+        if (window.toastTimer) clearTimeout(window.toastTimer);
+        toastMsgDiv.style.opacity = '1';
+        toastMsgDiv.innerText = msg;
+        toastMsgDiv.style.background = isError ? '#b33e1fdd' : '#2c5e2cdd';
+        window.toastTimer = setTimeout(() => toastMsgDiv.style.opacity = '0', 2000);
+    }
+    
+    // 简化乱麻线团
+    function drawSimpleYarnBall(ctx, width, height, seed = 0) {
+        const w = width, h = height;
+        ctx.clearRect(0, 0, w, h);
+        ctx.save();
+        ctx.strokeStyle = '#6b4c2a';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        let cx = w/2, cy = h/2;
+        let pointsCount = 12 + (seed % 8);
+        let points = [];
+        for (let i = 0; i < pointsCount; i++) {
+            let rad = (i * (0.6 + (seed % 10) * 0.05) + seed) % (Math.PI * 2);
+            let r = (Math.sin(rad * (1 + (seed % 3))) * 0.2 + 0.5) * Math.min(w,h) * 0.35;
+            let x = cx + Math.cos(rad) * r;
+            let y = cy + Math.sin(rad) * r;
+            points.push({x, y});
+        }
+        ctx.beginPath();
+        for (let i = 0; i < points.length; i++) {
+            if (i === 0) ctx.moveTo(points[i].x, points[i].y);
+            else ctx.lineTo(points[i].x, points[i].y);
+        }
+        ctx.stroke();
+        let smallCircles = 4 + (seed % 6);
+        for (let i = 0; i < smallCircles; i++) {
+            ctx.beginPath();
+            let rad = (i * 1.2 + seed) % (Math.PI*2);
+            let r = Math.sin(i) * (5 + (seed % 4)) + 3;
+            let x = cx + Math.cos(rad) * r;
+            let y = cy + Math.sin(rad) * r;
+            ctx.arc(x, y, 1.2 + (seed % 2), 0, Math.PI*2);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+    
+    // 动态完整小狗
+    function drawAnimatedDog(ctx, width, height) {
+        ctx.clearRect(0, 0, width, height);
+        ctx.save();
+        ctx.strokeStyle = '#2c2c2c';
+        ctx.lineWidth = 2.2;
+        ctx.lineCap = 'round';
+        const cx = width/2, cy = height/2;
+        ctx.beginPath();
+        ctx.moveTo(cx-12, cy-8);
+        ctx.quadraticCurveTo(cx-10, cy-18, cx-6, cy-10);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx-2, cy-9);
+        ctx.quadraticCurveTo(cx, cy-19, cx+4, cy-11);
+        ctx.stroke();
+        ctx.fillStyle = '#e09d32';
+        ctx.beginPath();
+        ctx.arc(cx-3, cy, 1.2, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#1a1a1a';
+        ctx.beginPath();
+        ctx.arc(cx-7, cy-4, 1.5, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx-1, cy-4, 1.2, 0, Math.PI*2);
+        ctx.fill();
+        let step = (Date.now() * 0.016) % (Math.PI * 2);
+        let legOffset = Math.sin(step) * 4;
+        ctx.beginPath();
+        ctx.moveTo(cx-8, cy+8);
+        ctx.lineTo(cx-9 + legOffset*0.4, cy+14);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx-2, cy+8);
+        ctx.lineTo(cx-3 - legOffset*0.3, cy+14);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx+4, cy+8);
+        ctx.lineTo(cx+3 + legOffset*0.4, cy+14);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx+10, cy+8);
+        ctx.lineTo(cx+9 - legOffset*0.4, cy+14);
+        ctx.stroke();
+        let tailAngle = Math.sin(Date.now() * 0.016) * 0.8;
+        ctx.beginPath();
+        ctx.moveTo(cx+12, cy);
+        ctx.quadraticCurveTo(cx+16 + Math.sin(tailAngle)*3, cy-4 + Math.cos(tailAngle)*3, cx+14, cy-8);
+        ctx.stroke();
+        ctx.restore();
+    }
+    
+    // 渲染微信群列表
+    function renderFriendList() {
+        friendsGrid.innerHTML = '';
+        for (let i = 0; i < TOTAL_MEMBERS; i++) {
+            const m = members[i];
+            const isChallenged = challengedStatus[i];
+            const isSelf = (i === MY_INDEX);
+            const card = document.createElement('div');
+            card.className = `friend-card ${isSelf ? 'highlight' : ''}`;
+            const canvasId = `dogCanvas_${i}`;
+            card.innerHTML = `
+                <canvas id="${canvasId}" width="48" height="48" class="dog-icon-canvas"></canvas>
+                <div class="friend-name ${!isChallenged ? 'gray' : ''}">${m.name}</div>
+            `;
+            friendsGrid.appendChild(card);
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            if (isChallenged) {
+                function animateFriendDog() {
+                    if (!canvas.isConnected) return;
+                    drawAnimatedDog(ctx, 48, 48);
+                    requestAnimationFrame(animateFriendDog);
+                }
+                animateFriendDog();
+            } else {
+                drawSimpleYarnBall(ctx, 48, 48, i * 17);
+            }
+        }
+    }
+    
+    // 更新个人状态页的小狗（当前用户）
+    function updateMyDogStatus() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 120;
+        canvas.height = 120;
+        canvas.style.width = '100%';
+        canvas.style.height = 'auto';
+        myDogCanvas.innerHTML = '';
+        myDogCanvas.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        if (hasTransformed) {
+            drawAnimatedDog(ctx, 120, 120);
+        } else {
+            drawSimpleYarnBall(ctx, 120, 120, MY_INDEX * 17);
+        }
+    }
+    
+    // 更新个人页面显示
+    function updatePersonalDog(isFullDog = false) {
+        personalDogCanvas.innerHTML = '';
+        const canvas = document.createElement('canvas');
+        canvas.width = 120;
+        canvas.height = 120;
+        canvas.style.width = '100%';
+        canvas.style.height = 'auto';
+        personalDogCanvas.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        if (isFullDog) {
+            function animatePersonalDog() {
+                if (!personalDogCanvas.contains(canvas)) return;
+                drawAnimatedDog(ctx, 120, 120);
+                requestAnimationFrame(animatePersonalDog);
+            }
+            animatePersonalDog();
+        } else {
+            drawSimpleYarnBall(ctx, 120, 120, MY_INDEX * 17);
+        }
+    }
+    
+    // 显示爱心特效和气泡
+    function showLoveAndBubble(text) {
+        if (loveInterval) clearInterval(loveInterval);
+        loveInterval = setInterval(() => {
+            const heart = document.createElement('div');
+            heart.className = 'love-floating';
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.bottom = '0px';
+            heart.style.position = 'absolute';
+            document.querySelector('.personal-dog-card').appendChild(heart);
+            setTimeout(() => heart.remove(), 1500);
+        }, 500);
+        setTimeout(() => clearInterval(loveInterval), 3000);
+        personalBubble.innerHTML = `<div style="background:#fff8e7; border-radius:30px; padding:6px 14px; display:inline-block; margin-top:8px;">💬 ${text}</div>`;
+        setTimeout(() => {
+            if (personalBubble.innerHTML.includes(text)) personalBubble.innerHTML = '';
+        }, 4000);
+    }
+    
+    // 直接重新开始游戏（无限循环核心）
+    function directRestartGame() {
+        if (gameAnimationId) cancelAnimationFrame(gameAnimationId);
+        if (timerInterval) clearInterval(timerInterval);
+        if (loveInterval) clearInterval(loveInterval);
+        if (!gameCanvas) {
+            initGameCanvas();
+        } else {
+            eliminatedWords = 0;
+            timerSeconds = 30;
+            gameCompletedFlag = false;
+            obstacleActive = true;
+            obstacleX = (gameCanvas ? gameCanvas.width : 500) + 30;
+            isTransforming = false;
+            exitObstacleX = null;
+            legCycle = 0;
+            frameCounter = 0;
+            bgOffset = 0;
+            obstacleRotation = 0;
+            isQuickSpeakActivated = false;
+            quickSpeakVisible = false;
+            if (quickSpeakBtn) {
+                quickSpeakBtn.style.display = 'none';
+                quickSpeakBtn.classList.remove('mic-mode', 'check-mode');
+                quickSpeakBtn.innerHTML = '<span>点击朗读</span>';
+            }
+            if (timerSecondsSpan) timerSecondsSpan.innerText = timerSeconds;
+            if (eliminatedCountSpan) eliminatedCountSpan.innerText = eliminatedWords;
+            updateWordForLevel();
+            resetGameCanvas();
+            if (gameAnimationId) cancelAnimationFrame(gameAnimationId);
+            gameAnimationId = requestAnimationFrame(animateGame);
+        }
+        document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden-panel'));
+        gamePanel.classList.remove('hidden-panel');
+        startTimer();
+        if (!micGranted) requestMicrophonePermission(false);
+    }
+    
+    // 喂食变形动画（第一次）
+    function startFeedTransform() {
+        if (isFeedingTransform) return;
+        if (hasTransformed) {
+            showLoveAndBubble("太爱主人啦");
+            feedButtonContainer.style.display = 'none';
+            afterFeedButtons.innerHTML = `
+                <button id="againChallengeAfterSecond" class="btn">🔄 再次挑战</button>
+                <button id="viewPetStatusAfterSecond" class="btn">📋 查看宠物状态</button>
+                <button id="nextTimeFromPersonalSecond" class="btn btn-secondary">👋 下次再见</button>
+            `;
+            afterFeedButtons.style.display = 'flex';
+            document.getElementById('againChallengeAfterSecond').onclick = () => { directRestartGame(); };
+            document.getElementById('viewPetStatusAfterSecond').onclick = () => {
+                personalPanel.classList.add('hidden-panel');
+                classListPanel.classList.remove('hidden-panel');
+                setupClassListButtonsAfterView();
+                renderFriendList();
+            };
+            document.getElementById('nextTimeFromPersonalSecond').onclick = () => { exitToMainMenu(); };
+            return;
+        }
+        isFeedingTransform = true;
+        transformProgress = 0;
+        transformStart = performance.now();
+        feedBtn.style.display = 'none';
+        const canvas = personalDogCanvas.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+        function animateTransform(now) {
+            const elapsed = now - transformStart;
+            let t = Math.min(1, elapsed / 2000);
+            transformProgress = t;
+            ctx.clearRect(0, 0, 120, 120);
+            if (t < 1) {
+                drawDissolvingYarn(ctx, 120, 120, MY_INDEX * 17, t);
+            } else {
+                isFeedingTransform = false;
+                hasTransformed = true;
+                challengedStatus[MY_INDEX] = true;
+                members[0].challenged = true;
+                updatePersonalDog(true);
+                showLoveAndBubble("期待主人再次投喂");
+                renderFriendList();
+                afterFeedButtons.innerHTML = `
+                    <button id="againChallengeAfterFirst" class="btn">🔄 再次挑战</button>
+                    <button id="viewPetStatusAfterFirst" class="btn">📋 查看宠物状态</button>
+                    <button id="nextTimeAfterFirstFeed" class="btn btn-secondary">👋 下次再见</button>
+                `;
+                afterFeedButtons.style.display = 'flex';
+                document.getElementById('againChallengeAfterFirst').onclick = () => { directRestartGame(); };
+                document.getElementById('viewPetStatusAfterFirst').onclick = () => {
+                    personalPanel.classList.add('hidden-panel');
+                    classListPanel.classList.remove('hidden-panel');
+                    setupClassListButtonsAfterView();
+                    renderFriendList();
+                };
+                document.getElementById('nextTimeAfterFirstFeed').onclick = () => { exitToMainMenu(); };
+                return;
+            }
+            requestAnimationFrame(animateTransform);
+        }
+        requestAnimationFrame(animateTransform);
+    }
+    
+    // 设置查看宠物状态后的班级列表页按钮（【继续挑战】和【下次再见】）
+    function setupClassListButtonsAfterView() {
+        classListButtons.innerHTML = `
+            <button id="continueChallengeBtn" class="btn">🎮 继续挑战</button>
+            <button id="nextTimeFromClassView" class="btn btn-secondary">👋 下次再见</button>
+        `;
+        document.getElementById('continueChallengeBtn').onclick = () => {
+            classListPanel.classList.add('hidden-panel');
+            directRestartGame();
+        };
+        document.getElementById('nextTimeFromClassView').onclick = () => { exitToMainMenu(); };
+    }
+    
+    function drawDissolvingYarn(ctx, width, height, seed, progress) {
+        const w = width, h = height;
+        ctx.save();
+        ctx.strokeStyle = '#6b4c2a';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        let cx = w/2, cy = h/2;
+        let pointsCount = 12 + (seed % 8);
+        let points = [];
+        for (let i = 0; i < pointsCount; i++) {
+            let rad = (i * (0.6 + (seed % 10) * 0.05) + seed) % (Math.PI * 2);
+            let r = (Math.sin(rad * (1 + (seed % 3))) * 0.2 + 0.5) * Math.min(w,h) * 0.35;
+            let x = cx + Math.cos(rad) * r;
+            let y = cy + Math.sin(rad) * r;
+            let offset = progress * 20;
+            let angle = rad + progress * 2;
+            x += Math.cos(angle) * offset;
+            y += Math.sin(angle) * offset;
+            points.push({x, y});
+        }
+        ctx.beginPath();
+        for (let i = 0; i < points.length; i++) {
+            if (i === 0) ctx.moveTo(points[i].x, points[i].y);
+            else ctx.lineTo(points[i].x, points[i].y);
+        }
+        ctx.stroke();
+        let smallCircles = 4 + (seed % 6);
+        for (let i = 0; i < smallCircles; i++) {
+            ctx.beginPath();
+            let rad = (i * 1.2 + seed) % (Math.PI*2);
+            let r = Math.sin(i) * (5 + (seed % 4)) + 3;
+            let x = cx + Math.cos(rad) * r;
+            let y = cy + Math.sin(rad) * r;
+            let angle = rad + progress * 2;
+            x += Math.cos(angle) * (progress * 15);
+            y += Math.sin(angle) * (progress * 15);
+            ctx.arc(x, y, 1.2 + (seed % 2), 0, Math.PI*2);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+    
+    function exitToMainMenu() {
+        if (gameAnimationId) cancelAnimationFrame(gameAnimationId);
+        if (timerInterval) clearInterval(timerInterval);
+        if (loveInterval) clearInterval(loveInterval);
+        document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden-panel'));
+        mainMenuPanel.classList.remove('hidden-panel');
+        gameCompletedFlag = false;
+        eliminatedWords = 0;
+        timerSeconds = 30;
+    }
+    
+    // 游戏核心函数（完整实现）
+    function updateWordForLevel() {
+        const words = ["apple", "banana", "juice", "dad", "table"];
+        currentWord = words[Math.floor(Math.random() * words.length)];
+        if (currentWordLabel) currentWordLabel.innerText = currentWord;
+    }
+    function updateUI() {
+        if (eliminatedCountSpan) eliminatedCountSpan.innerText = eliminatedWords;
+    }
+    async function requestMicrophonePermission(showMsg = true) {
+        if (!navigator.mediaDevices) return false;
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            stream.getTracks().forEach(t => t.stop());
+            micGranted = true;
+            if (micStatusLabel) micStatusLabel.innerText = "🎤 已授权";
+            if(showMsg) showToast("✅ 麦克风就绪", false);
+            return true;
+        } catch(e) {
+            micGranted = false;
+            if (micStatusLabel) micStatusLabel.innerText = "🎤 未授权";
+            return false;
+        }
+    }
+    function performRecognition() {
+        return new Promise((resolve, reject) => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) reject("不支持");
+            const recog = new SpeechRecognition();
+            recog.continuous = false; recog.interimResults = false; recog.lang = 'en-US';
+            let timeout = setTimeout(() => { recog.abort(); reject("超时"); }, 6000);
+            recog.onresult = (e) => { clearTimeout(timeout); resolve(e.results[0][0].transcript.trim().toLowerCase()); };
+            recog.onerror = () => { clearTimeout(timeout); reject("识别失败"); };
+            recog.start();
+        });
+    }
+    async function quickSpeak() {
+        if (!micGranted && !(await requestMicrophonePermission(true))) return;
+        if (isWaitingForResult) return;
+        if (gameCompletedFlag) return;
+        if (!obstacleActive) return;
+        if (quickSpeakBtn && !isQuickSpeakActivated) {
+            quickSpeakBtn.classList.add('mic-mode');
+            quickSpeakBtn.innerHTML = '<span style="display:none;">点击朗读</span>';
+            isQuickSpeakActivated = true;
+        }
+        isWaitingForResult = true;
+        showToast(`🎤 读: ${currentWord}`);
+        try {
+            const recognized = await performRecognition();
+            const match = (recognized === currentWord.toLowerCase() || 
+                recognized.replace(/s$/, '') === currentWord.toLowerCase() ||
+                currentWord.toLowerCase().includes(recognized) ||
+                recognized.includes(currentWord.toLowerCase()));
+            if (match) {
+                showToast(`✅ 正确！ +1斩词`);
+                eliminatedWords++;
+                updateUI();
+                if (quickSpeakBtn) {
+                    quickSpeakBtn.classList.remove('mic-mode');
+                    quickSpeakBtn.classList.add('check-mode');
+                    quickSpeakBtn.innerHTML = '<span style="display:none;">✓</span>';
+                    setTimeout(() => {
+                        quickSpeakBtn.style.display = 'none';
+                        quickSpeakBtn.classList.remove('check-mode');
+                        isQuickSpeakActivated = false;
+                        quickSpeakVisible = false;
+                    }, 300);
+                }
+                startTransformAndExit();
+            } else {
+                showToast(`❌ 读成「${recognized}」`, true);
+                if (quickSpeakBtn) {
+                    quickSpeakBtn.classList.remove('mic-mode');
+                    quickSpeakBtn.innerHTML = '<span>点击朗读</span>';
+                    isQuickSpeakActivated = false;
+                }
+                const demoBtn = document.getElementById('speakWordBtn');
+                if (demoBtn) {
+                    demoBtn.classList.add('blink');
+                    setTimeout(() => demoBtn.classList.remove('blink'), 600);
+                }
+            }
+        } catch(e) { showToast(`识别失败`, true); 
+            if (quickSpeakBtn) {
+                quickSpeakBtn.classList.remove('mic-mode');
+                quickSpeakBtn.innerHTML = '<span>点击朗读</span>';
+                isQuickSpeakActivated = false;
+            }
+        }
+        finally { isWaitingForResult = false; }
+    }
+    function speakCurrentWord() {
+        if (!window.speechSynthesis) return;
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(currentWord);
+        utter.lang = 'en-US'; utter.rate = 0.85;
+        window.speechSynthesis.speak(utter);
+        showToast(`🔊 ${currentWord}`);
+    }
+    function startTransformAndExit() {
+        if (isTransforming) return;
+        exitObstacleX = obstacleX;
+        obstacleActive = false;
+        isTransforming = true;
+        transformStartTime = performance.now();
+    }
+    function advanceToNextWord() {
+        obstacleActive = true;
+        obstacleX = (gameCanvas ? gameCanvas.width : 500) + 30;
+        updateWordForLevel();
+        showToast(`🎉 新单词: ${currentWord}`);
+        if (quickSpeakBtn) {
+            quickSpeakBtn.style.display = 'block';
+            quickSpeakBtn.classList.remove('mic-mode', 'check-mode');
+            quickSpeakBtn.innerHTML = '<span>点击朗读</span>';
+            quickSpeakVisible = true;
+            isQuickSpeakActivated = false;
+            updateQuickSpeakPosition();
+        }
+    }
+    function endGameByTimer() {
+        if (gameCompletedFlag) return;
+        gameCompletedFlag = true;
+        if (timerInterval) clearInterval(timerInterval);
+        cancelAnimationFrame(gameAnimationId);
+        gamePanel.classList.add('hidden-panel');
+        personalPanel.classList.remove('hidden-panel');
+        afterFeedButtons.innerHTML = '';
+        zeroScoreRetry.style.display = 'none';
+        if (eliminatedWords === 0) {
+            zeroScoreRetry.style.display = 'flex';
+            feedButtonContainer.style.display = 'none';
+            afterFeedButtons.style.display = 'none';
+            personalBottomButtons.style.display = 'none';
+            personalBubble.innerHTML = `<div style="background:#fff8e7; border-radius:30px; padding:6px 14px; display:inline-block;">❤️ 主人再试试，我相信你！</div>`;
+            updatePersonalDog(false);
+            const retryBtn = document.getElementById('retryGameBtn');
+            const nextZeroBtn = document.getElementById('nextTimeZeroBtn');
+            if (retryBtn) retryBtn.onclick = () => directRestartGame();
+            if (nextZeroBtn) nextZeroBtn.onclick = () => exitToMainMenu();
+        } else {
+            zeroScoreRetry.style.display = 'none';
+            feedButtonContainer.style.display = 'block';
+            feedBtn.style.display = 'inline-block';
+            afterFeedButtons.style.display = 'none';
+            personalBottomButtons.style.display = 'none';
+            personalBubble.innerHTML = `<div style="background:#fff8e7; border-radius:30px; padding:6px 14px; display:inline-block;">🎉 挑战结束！共斩词 ${eliminatedWords} 个 🎉</div>`;
+            if (hasTransformed) {
+                updatePersonalDog(true);
+            } else {
+                updatePersonalDog(false);
+            }
+            if (hasTransformed) {
+                feedBtn.onclick = () => {
+                    showLoveAndBubble("太爱主人啦");
+                    feedButtonContainer.style.display = 'none';
+                    afterFeedButtons.innerHTML = `
+                        <button id="againChallengeAfterSecond" class="btn">🔄 再次挑战</button>
+                        <button id="viewPetStatusAfterSecond" class="btn">📋 查看宠物状态</button>
+                        <button id="nextTimeFromPersonalSecond" class="btn btn-secondary">👋 下次再见</button>
+                    `;
+                    afterFeedButtons.style.display = 'flex';
+                    document.getElementById('againChallengeAfterSecond').onclick = () => { directRestartGame(); };
+                    document.getElementById('viewPetStatusAfterSecond').onclick = () => {
+                        personalPanel.classList.add('hidden-panel');
+                        classListPanel.classList.remove('hidden-panel');
+                        setupClassListButtonsAfterView();
+                        renderFriendList();
+                    };
+                    document.getElementById('nextTimeFromPersonalSecond').onclick = () => { exitToMainMenu(); };
+                };
+            } else {
+                feedBtn.onclick = startFeedTransform;
+            }
+        }
+        showToast(`挑战结束！你斩了 ${eliminatedWords} 个单词`);
+    }
+    function startTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            if (timerSeconds <= 0) {
+                clearInterval(timerInterval);
+                endGameByTimer();
+            } else {
+                timerSeconds--;
+                if (timerSecondsSpan) timerSecondsSpan.innerText = timerSeconds;
+            }
+        }, 1000);
+    }
+    
+    // 游戏绘图函数（完整实现，确保动画）
+    function drawBackground() {
+        const w = gameCanvas.width, h = gameCanvas.height;
+        const grad = gameCtx.createLinearGradient(0,0,0,h*0.6);
+        grad.addColorStop(0,'#cbe9c1'); grad.addColorStop(1,'#e2f5d6');
+        gameCtx.fillStyle=grad; gameCtx.fillRect(0,0,w,h);
+        gameCtx.save(); gameCtx.shadowBlur=0;
+        const hillOffset=bgOffset*0.4;
+        gameCtx.beginPath(); gameCtx.moveTo(0,h-70); gameCtx.quadraticCurveTo(100+hillOffset,h-100,200+hillOffset*0.8,h-75);
+        gameCtx.quadraticCurveTo(350+hillOffset,h-110,w,h-85); gameCtx.lineTo(w,h); gameCtx.lineTo(0,h);
+        gameCtx.fillStyle='#9bc46e'; gameCtx.fill();
+        gameCtx.beginPath(); gameCtx.moveTo(0,h-55); gameCtx.quadraticCurveTo(70-hillOffset*0.5,h-85,180-hillOffset*0.3,h-60);
+        gameCtx.quadraticCurveTo(300-hillOffset,h-95,w,h-70); gameCtx.lineTo(w,h); gameCtx.lineTo(0,h);
+        const gradHill=gameCtx.createLinearGradient(0,h-100,0,h); gradHill.addColorStop(0,'#7cb45e'); gradHill.addColorStop(1,'#5e9542');
+        gameCtx.fillStyle=gradHill; gameCtx.fill();
+        gameCtx.fillStyle='#6ea84f'; gameCtx.fillRect(0,h-48,w,48);
+        gameCtx.fillStyle='#fcf9e1';
+        gameCtx.beginPath(); gameCtx.ellipse(70+bgOffset*0.3,42,28,22,0,0,Math.PI*2);
+        gameCtx.ellipse(100+bgOffset*0.3,34,30,25,0,0,Math.PI*2);
+        gameCtx.ellipse(130+bgOffset*0.3,44,26,20,0,0,Math.PI*2); gameCtx.fill();
+        gameCtx.fillStyle='#fff4cf';
+        gameCtx.beginPath(); gameCtx.ellipse(380-bgOffset*0.2,58,32,24,0,0,Math.PI*2);
+        gameCtx.ellipse(420-bgOffset*0.2,50,28,22,0,0,Math.PI*2); gameCtx.fill();
+        gameCtx.restore();
+    }
+    function drawNormalDog(x, faceAlpha = 1.0, earOffset = 0) {
+        const groundY = gameCanvas.height - 48;
+        const dogY = groundY - 12;
+        gameCtx.save();
+        gameCtx.strokeStyle = '#2c2c2c';
+        gameCtx.lineWidth = 2.2;
+        if (faceAlpha > 0) {
+            gameCtx.globalAlpha = faceAlpha;
+            gameCtx.beginPath();
+            gameCtx.moveTo(x-12 + earOffset, dogY-18);
+            gameCtx.quadraticCurveTo(x-10 + earOffset, dogY-28, x-6 + earOffset, dogY-20);
+            gameCtx.stroke();
+            gameCtx.beginPath();
+            gameCtx.moveTo(x-2 + earOffset*0.5, dogY-19);
+            gameCtx.quadraticCurveTo(x + earOffset*0.5, dogY-29, x+4 + earOffset*0.3, dogY-21);
+            gameCtx.stroke();
+            gameCtx.fillStyle = '#e09d32';
+            gameCtx.beginPath();
+            gameCtx.arc(x-3, dogY-10, 1.2, 0, Math.PI*2);
+            gameCtx.fill();
+        }
+        gameCtx.globalAlpha = 1;
+        legCycle = (legCycle + 0.24) % (Math.PI*2);
+        const legOffset = Math.sin(legCycle) * 6;
+        const legShift = -4;
+        gameCtx.beginPath(); gameCtx.moveTo(x-5+legShift, dogY+2); gameCtx.lineTo(x-6+legShift+legOffset*0.4, dogY+10); gameCtx.stroke();
+        gameCtx.beginPath(); gameCtx.moveTo(x+legShift, dogY+2); gameCtx.lineTo(x-1+legShift-legOffset*0.3, dogY+10); gameCtx.stroke();
+        gameCtx.beginPath(); gameCtx.moveTo(x+6+legShift, dogY+2); gameCtx.lineTo(x+5+legShift+legOffset*0.4, dogY+10); gameCtx.stroke();
+        gameCtx.beginPath(); gameCtx.moveTo(x+11+legShift, dogY+2); gameCtx.lineTo(x+10+legShift-legOffset*0.4, dogY+10); gameCtx.stroke();
+        tailAngle = Math.sin(Date.now() * 0.016) * 1.2;
+        const tailX = x - 14, tailY = dogY - 6;
+        gameCtx.beginPath(); gameCtx.moveTo(tailX, tailY); gameCtx.quadraticCurveTo(tailX-8+Math.sin(tailAngle)*5, tailY-6+Math.cos(tailAngle)*5, tailX-12, tailY-3); gameCtx.stroke();
+        gameCtx.restore();
+    }
+    function drawWavyLine(x) {
+        const groundY = gameCanvas.height - 48, baseY = groundY - 4, now = performance.now();
+        const wavePhase = now * 0.006;
+        gameCtx.beginPath();
+        for (let i = -20; i <= 30; i+=2) {
+            const px = x + i, y = baseY + Math.sin(wavePhase + i*0.25)*8;
+            if (i===-20) gameCtx.moveTo(px,y); else gameCtx.lineTo(px,y);
+        }
+        gameCtx.strokeStyle = '#2c2c2c'; gameCtx.lineWidth = 3; gameCtx.stroke();
+    }
+    function drawExitingObstacle() {
+        if (exitObstacleX === null) return;
+        const x = exitObstacleX, groundY = gameCanvas.height-48, centerX=x+11, centerY=groundY-34;
+        gameCtx.save(); gameCtx.translate(centerX,centerY); gameCtx.rotate(obstacleRotation);
+        const colors = ['#FF6B6B','#4ECDC4','#FFE66D','#FF9F1C','#C77DFF','#F25E5E'];
+        const colorIdx = Math.floor(frameCounter/20) % colors.length;
+        gameCtx.fillStyle = colors[colorIdx]; gameCtx.shadowBlur = 8; gameCtx.shadowColor = '#ffcc88';
+        gameCtx.beginPath();
+        for (let i = 0; i < 8; i++) {
+            let angle = i * Math.PI * 2 / 8;
+            let radius = 14;
+            let xOff = Math.cos(angle) * radius;
+            let yOff = Math.sin(angle) * radius;
+            if (i % 2 === 0) { xOff *= 1.3; yOff *= 0.9; }
+            if (i === 0) gameCtx.moveTo(xOff, yOff);
+            else gameCtx.lineTo(xOff, yOff);
+        }
+        gameCtx.closePath(); gameCtx.fill();
+        gameCtx.fillStyle = '#FFD966'; gameCtx.beginPath(); gameCtx.arc(0,0,8,0,Math.PI*2); gameCtx.fill();
+        gameCtx.fillStyle = '#FFF'; gameCtx.beginPath(); gameCtx.arc(-4,-3,2,0,Math.PI*2); gameCtx.fill(); gameCtx.beginPath(); gameCtx.arc(4,-3,2,0,Math.PI*2); gameCtx.fill();
+        gameCtx.fillStyle = '#000'; gameCtx.beginPath(); gameCtx.arc(-4,-3,1,0,Math.PI*2); gameCtx.fill(); gameCtx.beginPath(); gameCtx.arc(4,-3,1,0,Math.PI*2); gameCtx.fill();
+        gameCtx.fillStyle = '#FF8C42'; gameCtx.beginPath(); gameCtx.moveTo(0,-14); gameCtx.lineTo(4,-18); gameCtx.lineTo(-4,-18); gameCtx.fill();
+        gameCtx.restore();
+        gameCtx.save(); gameCtx.shadowBlur=0;
+        const wordX=centerX, wordY=centerY-48;
+        gameCtx.fillStyle='#fffbe6'; gameCtx.beginPath(); gameCtx.ellipse(wordX,wordY,42,24,0,0,Math.PI*2); gameCtx.fill();
+        gameCtx.fillStyle="#5e3a1f"; gameCtx.font="bold 20px 'Comic Neue'"; gameCtx.textAlign="center"; gameCtx.textBaseline="middle";
+        gameCtx.fillText(currentWord,wordX,wordY);
+        gameCtx.restore();
+    }
+    function drawNormalObstacle() {
+        const x = obstacleX, groundY = gameCanvas.height-48, centerX=x+11, centerY=groundY-34;
+        obstacleRotation += 0.08;
+        gameCtx.save(); gameCtx.translate(centerX,centerY); gameCtx.rotate(obstacleRotation);
+        const colors = ['#FF6B6B','#4ECDC4','#FFE66D','#FF9F1C','#C77DFF','#F25E5E'];
+        const colorIdx = Math.floor(frameCounter/20) % colors.length;
+        gameCtx.fillStyle = colors[colorIdx]; gameCtx.shadowBlur = 8; gameCtx.shadowColor = '#ffcc88';
+        gameCtx.beginPath();
+        for (let i = 0; i < 8; i++) {
+            let angle = i * Math.PI * 2 / 8;
+            let radius = 14;
+            let xOff = Math.cos(angle) * radius;
+            let yOff = Math.sin(angle) * radius;
+            if (i % 2 === 0) { xOff *= 1.3; yOff *= 0.9; }
+            if (i === 0) gameCtx.moveTo(xOff, yOff);
+            else gameCtx.lineTo(xOff, yOff);
+        }
+        gameCtx.closePath(); gameCtx.fill();
+        gameCtx.fillStyle = '#FFD966'; gameCtx.beginPath(); gameCtx.arc(0,0,8,0,Math.PI*2); gameCtx.fill();
+        gameCtx.fillStyle = '#FFF'; gameCtx.beginPath(); gameCtx.arc(-4,-3,2,0,Math.PI*2); gameCtx.fill(); gameCtx.beginPath(); gameCtx.arc(4,-3,2,0,Math.PI*2); gameCtx.fill();
+        gameCtx.fillStyle = '#000'; gameCtx.beginPath(); gameCtx.arc(-4,-3,1,0,Math.PI*2); gameCtx.fill(); gameCtx.beginPath(); gameCtx.arc(4,-3,1,0,Math.PI*2); gameCtx.fill();
+        gameCtx.fillStyle = '#FF8C42'; gameCtx.beginPath(); gameCtx.moveTo(0,-14); gameCtx.lineTo(4,-18); gameCtx.lineTo(-4,-18); gameCtx.fill();
+        gameCtx.restore();
+        gameCtx.save(); gameCtx.shadowBlur=0;
+        const wordX=centerX, wordY=centerY-48;
+        gameCtx.fillStyle='#fffbe6'; gameCtx.beginPath(); gameCtx.ellipse(wordX,wordY,42,24,0,0,Math.PI*2); gameCtx.fill();
+        gameCtx.fillStyle="#5e3a1f"; gameCtx.font="bold 20px 'Comic Neue'"; gameCtx.textAlign="center"; gameCtx.textBaseline="middle";
+        gameCtx.fillText(currentWord,wordX,wordY);
+        gameCtx.restore();
+        if (quickSpeakVisible && quickSpeakBtn) updateQuickSpeakPosition();
+    }
+    function updateQuickSpeakPosition() {
+        if (!quickSpeakBtn) return;
+        const canvasRect = gameCanvas.getBoundingClientRect();
+        const containerRect = document.querySelector('.canvas-container').getBoundingClientRect();
+        const scaleX = canvasRect.width / gameCanvas.width;
+        const scaleY = canvasRect.height / gameCanvas.height;
+        const x = obstacleX + 35;
+        const y = gameCanvas.height - 48 - 30;
+        const screenX = canvasRect.left + x * scaleX;
+        const screenY = canvasRect.top + y * scaleY;
+        quickSpeakBtn.style.left = (screenX - containerRect.left) + 'px';
+        quickSpeakBtn.style.top = (screenY - containerRect.top - 20) + 'px';
+    }
+    function updateObstaclePosition() {
+        if (obstacleActive && !gameCompletedFlag) {
+            obstacleX -= OBSTACLE_SPEED;
+            if (obstacleX < RUNNER_X + 20) {
+                obstacleX = RUNNER_X + 20;
+                if (!quickSpeakVisible && !isQuickSpeakActivated) {
+                    if (quickSpeakBtn) {
+                        quickSpeakBtn.style.display = 'block';
+                        quickSpeakVisible = true;
+                        updateQuickSpeakPosition();
+                    }
+                }
+            }
+            if (obstacleX < 15) obstacleX = 15;
+        }
+        if (exitObstacleX !== null) {
+            exitObstacleX -= EXIT_SPEED;
+            if (exitObstacleX < -50) {
+                exitObstacleX = null;
+                if (isTransforming) isTransforming = false;
+                advanceToNextWord();
+            }
+        }
+    }
+    function drawScene() {
+        drawBackground();
+        if (exitObstacleX !== null) drawExitingObstacle();
+        else if (obstacleActive && !gameCompletedFlag) drawNormalObstacle();
+        if (gameCompletedFlag) {
+            drawNormalDog(RUNNER_X, 1, 0);
+        } else if (isTransforming) {
+            if (performance.now() - transformStartTime >= 800) {
+                isTransforming = false;
+                if (exitObstacleX === null) advanceToNextWord();
+            } else drawWavyLine(RUNNER_X);
+        } else {
+            drawNormalDog(RUNNER_X, 1, 0);
+        }
+        bgOffset = (bgOffset + 0.7) % 400;
+    }
+    function animateGame() {
+        if (gameCompletedFlag) { drawScene(); gameAnimationId = requestAnimationFrame(animateGame); return; }
+        frameCounter++;
+        updateObstaclePosition();
+        drawScene();
+        gameAnimationId = requestAnimationFrame(animateGame);
+    }
+    function resetGameCanvas() {
+        if (!gameCanvas) return;
+        isTransforming = false;
+        exitObstacleX = null;
+        legCycle = 0;
+        obstacleRotation = 0;
+        frameCounter = 0;
+        bgOffset = 0;
+        obstacleActive = true;
+        obstacleX = gameCanvas.width + 30;
+        if (quickSpeakBtn) {
+            quickSpeakBtn.style.display = 'none';
+            quickSpeakBtn.classList.remove('mic-mode', 'check-mode');
+            quickSpeakBtn.innerHTML = '<span>点击朗读</span>';
+        }
+        quickSpeakVisible = false;
+        isQuickSpeakActivated = false;
+    }
+    function initGameCanvas() {
+        gameCanvas = document.getElementById('gameCanvas');
+        if (!gameCanvas) return;
+        gameCtx = gameCanvas.getContext('2d');
+        gameCanvas.width = 500;
+        gameCanvas.height = 250;
+        resetGameCanvas();
+        updateWordForLevel();
+        updateUI();
+        if (gameAnimationId) cancelAnimationFrame(gameAnimationId);
+        gameAnimationId = requestAnimationFrame(animateGame);
+        if (!quickSpeakBtn) {
+            quickSpeakBtn = document.getElementById('quickSpeakBtn');
+            quickSpeakBtn.onclick = quickSpeak;
+        }
+        quickSpeakBtn.style.display = 'none';
+        quickSpeakVisible = false;
+    }
+    
+    // 页面跳转逻辑
+    myDogBtn.onclick = () => {
+        mainMenuPanel.classList.add('hidden-panel');
+        dogStatusPanel.classList.remove('hidden-panel');
+        updateMyDogStatus();
+    };
+    classPetsBtn.onclick = () => {
+        mainMenuPanel.classList.add('hidden-panel');
+        classListPanel.classList.remove('hidden-panel');
+        if (!hasTransformed) {
+            classListButtons.innerHTML = `
+                <button id="startChallengeFromClass" class="btn">🎮 开始挑战</button>
+                <button id="backToMainFromClass" class="btn btn-secondary">🔙 返回</button>
+            `;
+            document.getElementById('startChallengeFromClass').onclick = () => {
+                classListPanel.classList.add('hidden-panel');
+                directRestartGame();
+            };
+            document.getElementById('backToMainFromClass').onclick = () => {
+                classListPanel.classList.add('hidden-panel');
+                mainMenuPanel.classList.remove('hidden-panel');
+            };
+        } else {
+            setupClassListButtonsAfterView();
+        }
+        renderFriendList();
+    };
+    backToMainFromDog.onclick = () => {
+        dogStatusPanel.classList.add('hidden-panel');
+        mainMenuPanel.classList.remove('hidden-panel');
+    };
+    startChallengeBtn.onclick = () => {
+        dogStatusPanel.classList.add('hidden-panel');
+        gamePanel.classList.remove('hidden-panel');
+        eliminatedWords = 0;
+        timerSeconds = 30;
+        if (timerSecondsSpan) timerSecondsSpan.innerText = timerSeconds;
+        updateUI();
+        gameCompletedFlag = false;
+        initGameCanvas();
+        requestMicrophonePermission(false);
+        startTimer();
+    };
+    speakWordBtn.onclick = speakCurrentWord;
+    forceMicBtn.onclick = () => requestMicrophonePermission(true);
+    testMicBtn.onclick = async () => { if(await requestMicrophonePermission(true)) showToast("🎤 测试成功"); };
+    changeNicknameBtn.onclick = changeNickname;
+    
+    // 初始化
+    getStoredUserName();
+    initMembers();
+    renderFriendList();
+    updateMyDogStatus();
+    setTimeout(() => requestMicrophonePermission(false), 500);
+</script>
+</body>
+</html>
